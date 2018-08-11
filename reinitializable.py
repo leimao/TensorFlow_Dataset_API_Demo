@@ -145,7 +145,7 @@ class CNN(object):
         self.saver.restore(self.sess, filepath)
 
 
-def dataset_generation(images, labels, preprocess = preprocess, batch_size = 16, repeat = False, shuffle = False):
+def dataset_generation(images, labels, preprocess, batch_size = 16, repeat = False, shuffle = False):
     '''
     Generate tensorflow dataset object
     images: numpy array format
