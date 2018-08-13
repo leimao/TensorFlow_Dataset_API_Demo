@@ -191,7 +191,7 @@ Therefore, even if there are new data stream coming, we just have to create a ``
 
 ## TensorFlow Dataset API Drawbacks
 
-I tested training MNIST digit classifier on a TitanX GPU using Numpy format MNIST dataset with manual single-thread data loadinig and preprocessing, TensorFlow reinitializable ``Iterator``, and TensorFlow feedable ``Iterator``. I found TensorFlow reinitializable ``Iterator`` and TensorFlow feedable ``Iterator`` are comparable, but they are not significantly faster than manual single-thread data loadinig and preprocessing. 
+I tested training MNIST digit classifier on a NVIDIA TitanX GPU using Numpy format MNIST dataset with manual single-thread data loadinig and preprocessing, TensorFlow reinitializable ``Iterator``, and TensorFlow feedable ``Iterator``. I found TensorFlow reinitializable ``Iterator`` and TensorFlow feedable ``Iterator`` are comparable, but they are not significantly faster than manual single-thread data loadinig and preprocessing. 
 
 
 ### Manual Instance
