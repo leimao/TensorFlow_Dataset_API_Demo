@@ -74,7 +74,7 @@ train_dataset = dataset_generation(images = train_images, labels = train_labels,
 test_dataset = dataset_generation(images = test_images, labels = test_labels, preprocess = preprocessor.preprocess, batch_size = 16, repeat = False, shuffle = False)
 ```
 
-To generate TensorFlow dataset instance, usually four things have to be set.
+To generate TensorFlow ``Dataset`` instance, usually four things have to be set.
 
 **Iterable Numpy Array Format Dataset**
 
@@ -95,9 +95,9 @@ Designate the batch size for your dataset.
 
 ### Iterator Instance
 
-According to the TensorFlow official [guide](https://www.tensorflow.org/guide/datasets), there are four types of ``Iterator``: one-shot, initializable, reinitializable, and feedable. Personally I think reinitializable and feedable ``Iterator``s are the most useful in practice. I also integrate the ``Iterator`` instances into training class because I usually prefer to write TensorFlow code in a object-oriented fashion.
+According to the official TensorFlow [guide](https://www.tensorflow.org/guide/datasets), there are four types of ``Iterator``: one-shot, initializable, reinitializable, and feedable. Personally I think reinitializable and feedable ``Iterator``s are the most useful in practice. I also integrate the ``Iterator`` instances into training class because I usually prefer to write TensorFlow code in a object-oriented fashion.
 
-A typical object-oriented TensorFlow code with TensorFlow official ``Iterator`` reinitializable instance looks like this.
+A typical object-oriented TensorFlow code with the official TensorFlow ``Iterator`` reinitializable instance looks like this.
 
 ```python
 class CNN(object):
@@ -109,6 +109,7 @@ class CNN(object):
         self.dropout = dropout
         self.learning_rate = learning_rate
 
+        # TensorFlow Iterator instance
         self.iterator = tf.data.Iterator.from_structure(output_types = dataset_output_types, output_shapes = dataset_output_shapes)
         self.images, self.labels = self.iterator.get_next()
 
@@ -181,11 +182,11 @@ train_init_operator = self.iterator.make_initializer(train_dataset)
 self.sess.run(train_init_operator)
 ```
 
-Therefore, even if there are new data stream coming, we just have to create a ``Dataset`` instance outside the main TensorFlow graph, and pass the ``Dataset`` instance into the main TensorFlow graph for test.
+Therefore, even if there is new data stream coming, we just have to create a ``Dataset`` instance outside the main TensorFlow graph, and pass the ``Dataset`` instance into the main TensorFlow graph for ``Iterator`` initialization.
 
 ## TensorFlow Dataset API Drawbacks
 
-I tested training MNIST digit classifier on a NVIDIA TitanX GPU using Numpy format MNIST dataset with manual single-thread data loadinig and preprocessing, TensorFlow reinitializable ``Iterator``, and TensorFlow feedable ``Iterator``. I found TensorFlow reinitializable ``Iterator`` and TensorFlow feedable ``Iterator`` are comparable, but they are not significantly faster than manual single-thread data loadinig and preprocessing. 
+I tested training MNIST digit classifier on a NVIDIA TitanX GPU using Numpy format MNIST dataset with manual single-thread data loadinig and preprocessing instance, TensorFlow reinitializable ``Iterator`` instance, and TensorFlow feedable ``Iterator`` instance. I found TensorFlow reinitializable ``Iterator`` and TensorFlow feedable ``Iterator`` are comparable, but they are not significantly faster than manual single-thread data loadinig and preprocessing instance. 
 
 
 ### Manual Instance
@@ -265,10 +266,7 @@ Epoch: 019 | Train Accuracy: 1.00 | Test Accuracy: 0.92
 Time Elapsed: 00:00:05
 ```
 
-I later tried to increase the complexity of preprocessing function but found the there is only very slight improvement.
-
-<br />
-
+I later tried to increase the complexity of preprocessing function but found there is only very slight improvement.
 
 Because for some datasets, we would not load the whole dataset into memory as a Numpy array but read batches from hard drive using their filepaths. I tested loading MNIST dataset from hard drive during training. The test result is surprising, the TensorFlow ``Iterator`` intances are actually much slower than single-thread manual data loading.
 
@@ -352,7 +350,7 @@ Time Elapsed: 00:00:12
 
 ## Conclusions
 
-Using TensorFlow ``Iterator`` is not necessary faster than the self-implemented ``Iterator`` because of its heavy overhead running time. Based on these test results, I would not favor TensorFlow ``Iterator`` over my self-implemented ``Iterator`` in my daily TensorFlow usages. Maybe I would keep using ``feed_dict`` frequently simply because it looks more natural.
+Using TensorFlow ``Iterator`` is not necessary faster than the self-implemented single-thread ``Iterator`` because of its heavy overhead running time. Based on these test results, I would not favor TensorFlow ``Iterator`` over my self-implemented ``Iterator`` in my daily TensorFlow usages. Maybe I would keep using ``feed_dict`` frequently simply because it looks more natural.
 
 
 ## Final Remarks
