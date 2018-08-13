@@ -1,7 +1,7 @@
 '''
 TensorFlow Dataset API Example
 
-Feedable Iterator
+Manual Iterator
 
 Lei Mao
 
