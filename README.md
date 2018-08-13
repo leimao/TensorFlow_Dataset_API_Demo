@@ -4,31 +4,25 @@ Lei Mao
 
 University of Chicago
 
-
-
 ## Introduction
 
-I have been using TensorFlow since its first release (version 0.1) in 2015. So some of my coding habits for the earlier versions have been kept until now. One of the habits is that I always use ``placeholder`` and ``feed_dict`` to feed data, including training data, validation data, and test data, into tensor graph for computation. ``placeholder`` and ``feed_dict`` makes your program super flexible. When you have newly collected data, feeding data using ``feed_dict`` will never damage the tensor graph. When you want to change the dropout rate to 0 during test time, or adjust learning rate during training time, ``feed_dict`` is always the best choice to make your program flexible.
+I have been using TensorFlow since its first release (version 0.1) in 2015. So some of my coding habits for the earlier versions have been kept until now. One of the habits is that I always use ``placeholder`` and ``feed_dict`` to feed data, including training data, validation data, and test data, into TensorFlow graph for computation. ``placeholder`` and ``feed_dict`` make your program super flexible. When you have newly collected data, feeding data using ``feed_dict`` will never damage the pre-built TensorFlow graph. When you want to change the dropout rate to 0 during test time, or adjust learning rate during training time, ``feed_dict`` is always the best choice to make your program flexible.
 
-
-
-Because the datasets of some of my research projects become larger, I started to be concerned about the data loading efficiencies, as it may become the "bottleneck" of training process if not handled properly. For large datasets, it is not feasible to read all the data into memory and load the data to the program from memory (You may do it on your supercomputer, but others will probably not be able to run your program on their own desktops). So what people usually do is to read data from disk and do all the data preprocessing on the fly. So to make this portion of code looking neat, I have written ``Dataset`` and ``Iterator`` classes for some of my projects. However, they are not generalizable, meaning that if you want to use the ``Dataset`` and ``Iterator`` from one project for another project, it usually has to be modified significantly. In addition, my ``Dataset`` and ``Iterator`` was not written in multi-thread fashion, making me concerned about the loading and preprocessing efficiencies.
-
-
+Because the datasets of some of my research projects become larger, I started to be concerned about the data loading and preprocessing efficiencies, as it may become the "bottleneck" of training process if not being handled properly. For large datasets, it is not feasible to read all the data into memory and load the data to the program from memory (You may do it on your supercomputer, but others will probably not be able to run your program on their own desktops). So what people usually do is to read data from disk and do all the data preprocessing on the fly. So to make this portion of code looking neat, I have written ``Dataset`` and ``Iterator`` classes for some of my projects. However, they are not generalizable, meaning that if you want to use the ``Dataset`` and ``Iterator`` from one project for another project, it usually has to be modified significantly. In addition, my ``Dataset`` and ``Iterator`` was not written in multi-thread fashion, making me concerned about the loading and preprocessing efficiencies.
 
 As TensorFlow updates, I started to be aware that there are official ``Dataset`` and ``Iterator`` classes in TensorFlow, which allows users to make use of their internal optimization for loading and preprocessing data. According to the [TensorFlow](https://www.tensorflow.org/performance/datasets_performance) official documentation, using their ``Iterator`` should be asymptotically faster than an ordinary single-thread ``Iterator``. However, in my preliminary tests, I found the TensorFlow ``Iterator`` was significanly slower than a manual single-thread ``Iterator`` in some cases, probably due to its heavy overhead running time.
 
 
 ## TensorFlow Dataset API Usages
 
-Frankly, I think it is not easy to learn the TensorFlow Dataset APIs, because there are many different ways to use APIs and those ways have slightly different effects, which means that they have to be used for different purposes. The official [guide](https://www.tensorflow.org/guide/datasets) provided some toy examples of how to use TensorFlow Dataset APIs in different ways. But it is really hard for users to understand why they have to code in that way for each step, not even mention how to choose appropriate ways to code for different purposes.
+Frankly, I think it is not easy to learn the TensorFlow Dataset APIs, because there are many different ways to use the APIs and those ways have slightly different effects, which means that they have to be used for different purposes. The official [guide](https://www.tensorflow.org/guide/datasets) provided some toy examples of how to use TensorFlow Dataset APIs in different ways. But it is really hard for users to understand why they have to code in that way for each step, not even mention how to choose appropriate ways to code for different purposes.
 
 
 For most of the ways of using TensorFlow Dataset APIs, they will work well for most of your research projects because usually the dataset of your research project is fixed. You can create ``Dataset`` and ``Iterator`` instances for your fixed training, validation, and test dataset independently. Your TensorFlow program does not have to be written in a fashion that allows new data neither. However, in practice, we always trained our model for testing new data, and our TensorFlow program has to allow new data streams if it is going to be a real application. In this case, we need to carefully design our program to allow the new data stream using TensorFlow official ``Iterator``.
 
 
 
-The toy dataset on TensorFlow official [guide](https://www.tensorflow.org/guide/datasets) is trivial. Here I will use MNIST dataset as a concrete example.
+The toy dataset on TensorFlow official [guide](https://www.tensorflow.org/guide/datasets) for TensorFlow Dataset API usages is trivial. Here I will use MNIST dataset as a concrete example. TensorFlow ``Dataset`` and ``Iterator`` instances are the two compulsary components of the API.
 
 
 ### Dataset Instance
@@ -73,28 +67,28 @@ def dataset_generation(images, labels, preprocess, buffer_size = 100000, batch_s
 
     return dataset
 
-# Create TensorFlow Dataset instance
+# Create TensorFlow dataset preprocessing unit
 preprocessor = Preprocessor(num_classes = num_classes)
-
+# Create TensorFlow Dataset instance
 train_dataset = dataset_generation(images = train_images, labels = train_labels, preprocess = preprocessor.preprocess, batch_size = 16, repeat = True, shuffle = True)
 test_dataset = dataset_generation(images = test_images, labels = test_labels, preprocess = preprocessor.preprocess, batch_size = 16, repeat = False, shuffle = False)
 ```
 
 To generate TensorFlow dataset instance, usually four things have to be set.
 
-* Iterable Numpy Array Format Dataset
+**Iterable Numpy Array Format Dataset**
 
-For small dataset, it could be just the numpy array of the whole dataset. For large dataset, it could just be the filenames or filepath of the data stored in the hard drive.
+For small dataset, it could be just the numpy array of the whole dataset. For large dataset, it could be the filenames or filepath of the data stored in the hard drive.
 
-* Data Preprocess
+**Data Preprocess**
 
-The dataset preprocessing was done using ``map``. This is where the preprocessing and loading efficiencies happen, since the ``map`` function allows the prcedures to run in parallel.
+The dataset preprocessing was done using ``map``. This is where the preprocessing and loading efficiencies happen, since the ``map`` function allows the procedures to run in parallel.
 
-* Shuffle
+**Shuffle**
 
 Usually we could just shuffle the dataset beforehand without using the built-in shuffle function. If you use shuffle for dataset, it will shuffle the dataset every time you start a new ``Iterator`` instance and it is usually slow in practice.
 
-* Batch Size
+**Batch Size**
 
 Designate the batch size for your dataset.
 
