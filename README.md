@@ -16,7 +16,7 @@ Because the datasets of some of my research projects become larger, I started to
 
 
 
-As TensorFlow updates, I started to be aware that there are official ``Dataset`` and ``Iterator`` classes in TensorFlow, which allows users to make use of their internal optimization for loading and preprocessing data. According to [TensorFlow](https://www.tensorflow.org/performance/datasets_performance)'s official documentation, using their ``Iterator`` should asymptotically faster than an ordinary single-thread ``Iterator``. However, in my preliminary tests, I found the TensorFlow ``Iterator`` was significanly slower than a manual single-thread ``Iterator``, probably due to its heavy overhead running time.
+As TensorFlow updates, I started to be aware that there are official ``Dataset`` and ``Iterator`` classes in TensorFlow, which allows users to make use of their internal optimization for loading and preprocessing data. According to the [TensorFlow](https://www.tensorflow.org/performance/datasets_performance) official documentation, using their ``Iterator`` should be asymptotically faster than an ordinary single-thread ``Iterator``. However, in my preliminary tests, I found the TensorFlow ``Iterator`` was significanly slower than a manual single-thread ``Iterator`` in some cases, probably due to its heavy overhead running time.
 
 
 ## TensorFlow Dataset API Usages
